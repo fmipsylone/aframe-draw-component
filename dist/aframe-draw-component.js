@@ -42,7 +42,7 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	// Browser distribution of the A-Frame component.
 	(function () {
@@ -66,9 +66,9 @@
 	})();
 
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports.component = {
 		schema: {
@@ -106,13 +106,32 @@
 			_.ctx = canvas.getContext("2d");
 
 			this.texture = new THREE.Texture(_.canvas); //renders straight from a canvas
-			if(this.el.object3D.children.length > 0) { //backwards compatibility
-				this.el.object3D.children[0].material = new THREE.MeshBasicMaterial();
-				this.el.object3D.children[0].material.map = this.texture;
-			}
-			else { //backwards compatibility
-				this.el.object3D.material = new THREE.MeshBasicMaterial();
-				this.el.object3D.material.map = this.texture;
+			if(this.el.tagName == 'A-SPRITE'){
+				this.hotspotMaterial = new THREE.SpriteMaterial({map: this.texture});
+				var _created = false;
+				
+				if(this.sprite === undefined) {
+					this.sprite = new THREE.Sprite(this.hotspotMaterial);
+					_created = true;
+				}
+				
+				var _sprite = this.el.components.sprite;
+
+		        resizeData = _sprite.data.resize.split(' ');
+		        this.sprite.scale.set( resizeData[0], resizeData[1], resizeData[2] );
+				
+				if(_created) this.el.setObject3D('mesh', this.sprite);
+			} else {
+				if(this.el.object3D.children.length > 0) { //backwards compatibility
+					this.el.object3D.children[0].material = new THREE.MeshBasicMaterial();
+					this.el.object3D.children[0].material.map = this.texture;
+					this.el.object3D.children[0].material.transparent = true;	 
+				}
+				else { //backwards compatibility
+					this.el.object3D.material = new THREE.MeshBasicMaterial();
+					this.el.object3D.material.map = this.texture;
+					this.el.object3D.material.transparent = true;
+				}
 			}
 			if(!this.el.hasLoaded) this.el.addEventListener("loaded", function() {
 				_.render();
@@ -137,5 +156,5 @@
 	};
 
 
-/***/ }
+/***/ })
 /******/ ]);
